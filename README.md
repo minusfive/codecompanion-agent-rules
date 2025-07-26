@@ -10,7 +10,7 @@ And yes, this README was AI generated for the most part. I added this bit and tw
 
 ## 🚀 Overview
 
-From the [original discussion post](https://github/github.com/olimorris/codecompanion.nvim/discussions/1718):
+From the [original discussion post](https://github.com/olimorris/codecompanion.nvim/discussions/1718):
 
 > Every project has its own unique set of rules and guidelines—often scattered across different files. Remembering which files to include in your AI chat is a real cognitive burden. This extension solves that by automatically detecting and attaching all relevant rule files (like `.rules`, `AGENT.md`, and more) to your chat context. No more manual selection or forgetting important context!
 >
