@@ -1,16 +1,10 @@
 # CodeCompanion - Agent Rules Extension
 
-> Automatically add project rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
-
-## 📖 Background
-
-[@arnm](https://github.com/arnm) graciously [shared this extension with the community](https://github.com/olimorris/codecompanion.nvim/discussions/1718), so all credit goes to them. I literally just copy-pasta'd 🍜 it and used it to learn how to wire-up [CodeCompanion Extensions](https://codecompanion.olimorris.dev/extending/extensions.html).
-
-And yes, this README was AI generated for the most part. I added this bit and tweaked some stuff.
+Automatically add project rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
 
 ## 🚀 Overview
 
-From the [original discussion post](https://github.com/olimorris/codecompanion.nvim/discussions/1718):
+[@arnm](https://github.com/arnm) graciously [shared this extension with the community](https://github.com/olimorris/codecompanion.nvim/discussions/1718), so all credit goes to them. From the original discussion post:
 
 > Every project has its own unique set of rules and guidelines—often scattered across different files. Remembering which files to include in your AI chat is a real cognitive burden. This extension solves that by automatically detecting and attaching all relevant rule files (like `.rules`, `AGENT.md`, and more) to your chat context. No more manual selection or forgetting important context!
 >
@@ -24,6 +18,8 @@ From the [original discussion post](https://github.com/olimorris/codecompanion.n
 >
 > - When you add a file/buffer reference
 > - By default, when you do @files operations (edit, create, read). You can define you own extract from message function
+
+I literally just copy-pasta'd 🍜 it and used it to learn how to wire-up [CodeCompanion Extensions](https://codecompanion.olimorris.dev/extending/extensions.html). And yes, this README was AI generated for the most part. I added this bit and tweaked some stuff.
 
 ## ✨ Features
 
