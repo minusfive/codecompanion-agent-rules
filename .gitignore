@@ -1,0 +1,55 @@
+# Lua compiled files
+*.so
+*.o
+*.out
+*.obj
+*.exe
+*.dll
+*.dylib
+luac.out
+
+# Lua language server
+.luarc.json
+
+# Neovim plugin specific
+doc/tags
+.nvimlog
+
+# Generated documentation
+doc/tags
+
+# Dependencies
+/lua/deps/
+
+# Local development
+.dev/
+
+# Package managers
+.luarocks/
+/lua_modules/
+
+# Testing and coverage
+/test/temp/
+/test/reports/
+/.luacov
+luacov.report.out
+luacov.stats.out
+
+# OS specific files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# IDE/editor files
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# Build output
+/build/
+/dist/
+
+# Logs
+*.log
