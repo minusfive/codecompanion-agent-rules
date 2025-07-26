@@ -1,4 +1,4 @@
-# CodeCompanion - Agent Rules Extension
+# Agent Rules CodeCompanion Extension
 
 Automatically add project rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
 
