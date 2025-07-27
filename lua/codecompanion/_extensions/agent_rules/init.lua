@@ -8,7 +8,7 @@
 ---@class CodeCompanionChatMessage
 ---@field content? string
 ---@field opts? table
----@field opts.reference? string
+---@field opts.context_id? string
 ---@field role? string
 ---@field id? any
 ---@field cycle? any
@@ -74,9 +74,9 @@ local function hash(list)
   return table.concat(list, "|")
 end
 
-local function is_file_ref(ref)
-  return (type(ref.id) == "string" and (ref.id:match("^<file>") or ref.id:match("^<buf>")))
-    or (type(ref.source) == "string" and (ref.source:match("%.file$") or ref.source:match("%.buffer$")))
+local function is_file_context_item(ctx)
+  return (type(ctx.id) == "string" and (ctx.id:match("^<file>") or ctx.id:match("^<buf>")))
+    or (type(ctx.source) == "string" and (ctx.source:match("%.file$") or ctx.source:match("%.buffer$")))
 end
 
 local function id_to_path(id) return id:match("^<file>(.*)</file>$") or id:match("^<buf>(.*)</buf>$") or id end
@@ -116,15 +116,15 @@ local function collect_paths(bufnr)
     end
   end
 
-  -- refs
-  for _, r in ipairs(chat.refs or {}) do
-    if is_file_ref(r) then add(r.path ~= "" and r.path or id_to_path(r.id)) end
+  -- context_items
+  for _, r in ipairs(chat.context_items or {}) do
+    if is_file_context_item(r) then add(r.path ~= "" and r.path or id_to_path(r.id)) end
   end
 
   -- messages
   for _, msg in ipairs(chat.messages) do
-    if msg.opts and msg.opts.reference then
-      local p = msg.opts.reference:match("^<file>([^<]+)</file>$") or msg.opts.reference:match("^<buf>([^<]+)</buf>$")
+    if msg.opts and msg.opts.context_id then
+      local p = msg.opts.context_id:match("^<file>([^<]+)</file>$") or msg.opts.context_id:match("^<buf>([^<]+)</buf>$")
       if p then add(p) end
     end
 
@@ -189,16 +189,16 @@ local function collect_rules(paths)
 end
 
 --──────────────────────────────────────────────────────────────────────────────
---  Keep chat.refs in sync with rule files
+--  Keep chat.context_items in sync with rule files
 --──────────────────────────────────────────────────────────────────────────────
-local function sync_refs(bufnr, rule_files)
+local function sync_context(bufnr, rule_files)
   if not M.config.enabled then return end
 
   ---------------------------------------------------------------------------
   -- helpers
   ---------------------------------------------------------------------------
-  local function ref_opts(opts)
-    -- enforce exactly the flags we want on every rule–managed reference
+  local function context_opts(opts)
+    -- enforce exactly the flags we want on every rule–managed context_item
     return vim.tbl_extend("force", opts or {}, {
       rules_managed = true,
       pinned = true,
@@ -224,9 +224,9 @@ local function sync_refs(bufnr, rule_files)
         vim.api.nvim_buf_set_lines(chat.bufnr, start, i, false, {})
         -- chat.ui:lock_buf()
       end
-      if chat.references and chat.references.render then
+      if chat.context and chat.context.render then
         chat.ui:unlock_buf()
-        chat.references:render()
+        chat.context:render()
         -- chat.ui:lock_buf()
       end
       chat.ui:unlock_buf()
@@ -240,9 +240,10 @@ local function sync_refs(bufnr, rule_files)
   if not chat then return end
 
   ---------------------------------------------------------------------------
-  -- 1. desired refs  ▸  keyed by project-relative path
+  -- 1. desired context_items  ▸  keyed by project-relative path
   ---------------------------------------------------------------------------
-  local desired = {} ---@type table<string,{id:string,bufnr?:integer}>
+  ---@type table<string,{id:string,bufnr?:integer}>
+  local desired = {}
   for _, abs in ipairs(rule_files) do
     local rel = vim.fn.fnamemodify(abs, ":.")
     local bn = vim.fn.bufnr(rel)
@@ -252,15 +253,16 @@ local function sync_refs(bufnr, rule_files)
   end
 
   ---------------------------------------------------------------------------
-  -- 2. existing refs  ▸  de-duplicate & index by path
+  -- 2. existing context_items  ▸  de-duplicate & index by path
   ---------------------------------------------------------------------------
-  local existing = {} ---@type table<string,CodeCompanion.Chat.Ref>
-  for i = #chat.refs, 1, -1 do
-    local r = chat.refs[i]
-    if is_file_ref(r) then
+  ---@type table<string, CodeCompanion.Chat.Context>
+  local existing = {}
+  for i = #chat.context_items, 1, -1 do
+    local r = chat.context_items[i]
+    if is_file_context_item(r) then
       local path = id_to_path(r.id)
       if existing[path] then -- duplicate → remove
-        table.remove(chat.refs, i)
+        table.remove(chat.context_items, i)
       else
         existing[path] = r -- first occurrence wins
       end
@@ -268,13 +270,13 @@ local function sync_refs(bufnr, rule_files)
   end
 
   ---------------------------------------------------------------------------
-  -- 3. ensure every desired ref exists & is normalised
+  -- 3. ensure every desired context_item exists & is normalised
   ---------------------------------------------------------------------------
   local added_cnt = 0
   for path, want in pairs(desired) do
     local r = existing[path]
     if not r then
-      local opts = ref_opts({})
+      local opts = context_opts({})
       if want.bufnr then
         require("codecompanion.strategies.chat.slash_commands.buffer")
           .new({ Chat = chat })
@@ -282,27 +284,27 @@ local function sync_refs(bufnr, rule_files)
       else
         require("codecompanion.strategies.chat.slash_commands.file").new({ Chat = chat }):output({ path = path }, opts)
       end
-      r = chat.refs[#chat.refs] -- last one is the ref we just added
+      r = chat.context_items[#chat.context_items] -- last one is the context_item we just added
       added_cnt = added_cnt + 1
     end
-    r.opts = ref_opts(r.opts) -- normalise flags
+    r.opts = context_opts(r.opts) -- normalise flags
   end
 
   ---------------------------------------------------------------------------
-  -- 4. drop obsolete rule-managed refs
+  -- 4. drop obsolete rule-managed context_items
   ---------------------------------------------------------------------------
   local removed_cnt = 0
-  for i = #chat.refs, 1, -1 do
-    local r = chat.refs[i]
+  for i = #chat.context_items, 1, -1 do
+    local r = chat.context_items[i]
     if r.opts and r.opts.rules_managed then
       local p = id_to_path(r.id)
       if not desired[p] then
-        local ref_id = r.id
-        table.remove(chat.refs, i)
+        local context_id = r.id
+        table.remove(chat.context_items, i)
         -- also purge any messages that still reference it
         for j = #chat.messages, 1, -1 do
           local m = chat.messages[j]
-          if m.opts and m.opts.reference == ref_id then table.remove(chat.messages, j) end
+          if m.opts and m.opts.context_id == context_id then table.remove(chat.messages, j) end
         end
         removed_cnt = removed_cnt + 1
       end
@@ -313,14 +315,14 @@ local function sync_refs(bufnr, rule_files)
   -- 5. feedback + context re-render
   ---------------------------------------------------------------------------
   if added_cnt + removed_cnt > 0 then
-    log(string.format("sync_refs → +%d -%d", added_cnt, removed_cnt))
+    log(string.format("sync_context → +%d -%d", added_cnt, removed_cnt))
     notify(
-      (added_cnt > 0 and ("Added %d rule reference(s)"):format(added_cnt) or nil),
-      (removed_cnt > 0 and ("Removed %d obsolete reference(s)"):format(removed_cnt) or nil)
+      (added_cnt > 0 and ("Added %d rule context_item(s)"):format(added_cnt) or nil),
+      (removed_cnt > 0 and ("Removed %d obsolete context_item(s)"):format(removed_cnt) or nil)
     )
     rerender_context(chat)
   else
-    log("sync_refs → no change")
+    log("sync_context → no change")
   end
 end
 
@@ -339,7 +341,7 @@ local function process(bufnr)
   end
   fingerprint[bufnr] = fp
 
-  sync_refs(bufnr, collect_rules(paths))
+  sync_context(bufnr, collect_rules(paths))
   log("process -> done")
 end
 
@@ -438,7 +440,7 @@ function M.setup(opts)
   vim.api.nvim_create_user_command(
     "CodeCompanionRulesProcess",
     function() on_mode(vim.api.nvim_get_current_buf()) end,
-    { desc = "Re-evaluate rule references now" }
+    { desc = "Re-evaluate rule context_items now" }
   )
 
   vim.api.nvim_create_user_command("CodeCompanionRulesDebug", function()
