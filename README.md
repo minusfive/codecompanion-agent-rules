@@ -1,6 +1,6 @@
 # Agent Rules - CodeCompanion Extension
 
-Automatically add agent rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
+Neovim plugin to automatically detect and add agent rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context.
 
 ## 🚀 Overview
 
