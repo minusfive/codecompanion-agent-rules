@@ -1,6 +1,6 @@
-# Agent Rules CodeCompanion Extension
+# Agent Rules - CodeCompanion Extension
 
-Automatically add project rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
+Automatically add agent rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context
 
 ## 🚀 Overview
 
@@ -170,6 +170,5 @@ If the extension isn't working as expected:
 ## 🙏 Credits
 
 - [CodeCompanion](https://github.com/olimorris/codecompanion.nvim) - The main plugin this extends
-- Original implementation by [arnm](https://github.com/arnm)
+- [Original discussion thread](https://github.com/olimorris/codecompanion.nvim/discussions/1718) by [arnm](https://github.com/arnm)
 - Inspired by agentic code tools like [Cursor](https://docs.cursor.com/context/rules), [ClaudeCode](https://docs.anthropic.com/en/docs/claude-code/memory#how-claude-looks-up-memories), etc.
-- [Discussion thread](https://github.com/olimorris/codecompanion.nvim/discussions/1718)
