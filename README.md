@@ -1,5 +1,9 @@
 # Agent Rules - CodeCompanion Extension
 
+> [!IMPORTANT]
+> This is now a native feature of CodeCompanion known as "[Memory](https://codecompanion.olimorris.dev/usage/chat-buffer/memory.html)".
+> Therefore, this extension is now archived. I recommend you uninstall it and use the native functionality instead.
+
 Neovim plugin to automatically detect and add agent rules to your [CodeCompanion](https://codecompanion.olimorris.dev) chat context.
 
 ## 🚀 Overview
